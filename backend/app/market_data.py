@@ -9,6 +9,8 @@ import requests
 import yfinance as yf
 from dotenv import load_dotenv
 
+import re
+
 
 BACKEND_DIR = Path(__file__).resolve().parents[1]
 CACHE_DIR = BACKEND_DIR / "cache"
@@ -97,6 +99,54 @@ def _save_cached_history(ticker: str, period_days: int, df: pd.DataFrame) -> Non
 
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
+def sanitize_provider_error(error: str) -> str:
+    """
+    Convert raw provider errors into user-safe messages.
+    This prevents API keys or provider internals from being exposed to frontend users.
+    """
+
+    message = str(error)
+
+    # Remove obvious API key patterns if they appear in provider messages.
+    message = re.sub(
+        r"API key as [A-Za-z0-9_\-]+",
+        "API key as [REDACTED]",
+        message,
+        flags=re.IGNORECASE,
+    )
+    message = re.sub(
+        r"apikey=[A-Za-z0-9_\-]+",
+        "apikey=[REDACTED]",
+        message,
+        flags=re.IGNORECASE,
+    )
+
+    lower = message.lower()
+
+    if "alpha vantage" in lower and (
+        "rate limit" in lower
+        or "25 requests per day" in lower
+        or "please subscribe" in lower
+        or "detected your api key" in lower
+    ):
+        return "Alpha Vantage 免费接口达到请求限制。系统已尝试备用数据源或本地缓存。"
+
+    if "alpha vantage" in lower and "premium" in lower:
+        return "Alpha Vantage 当前免费接口不支持该历史数据范围。"
+
+    if "missing alpha_vantage_api_key" in lower:
+        return "Alpha Vantage API key 未配置。请在 backend/.env 中设置 ALPHA_VANTAGE_API_KEY。"
+
+    if "yfinance" in lower and (
+        "too many requests" in lower
+        or "rate limited" in lower
+    ):
+        return "Yahoo Finance / yfinance 暂时限流。系统已尝试备用数据源或本地缓存。"
+
+    if "too many requests" in lower or "rate limit" in lower:
+        return "行情数据源达到请求限制。请稍后重试。"
+
+    return "行情数据源暂时不可用。请稍后重试或切换数据源。"
 
 def _clean_history_df(df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -240,40 +290,48 @@ def _fetch_yfinance_history(ticker: str, period_days: int) -> Tuple[pd.DataFrame
 
     return df, "Yahoo Finance via yfinance"
 
-
 def _fetch_history_with_fallback(ticker: str, period_days: int) -> Tuple[pd.DataFrame, str, List[str]]:
     """
     Fetch market data with provider fallback.
 
     Priority:
-    1. Alpha Vantage
-    2. yfinance
-    3. local cache
+    1. Fresh local cache
+    2. Alpha Vantage
+    3. yfinance
+    4. Existing local cache fallback
 
-    This avoids hallucinating market data when APIs fail.
+    This protects API quota and prevents leaking raw provider errors.
     """
 
     warnings: List[str] = []
 
+    # 1. Cache first: protect API quota.
+    cached_df = _load_cached_history(ticker, period_days, max_age_hours=24)
+    if not cached_df.empty:
+        warnings.append("使用 24 小时内本地缓存数据，以减少外部 API 请求。")
+        return cached_df, "Local cache from previous market data result", warnings
+
+    # 2. Alpha Vantage
     try:
         df, source = _fetch_alpha_vantage_history(ticker, period_days)
         _save_cached_history(ticker, period_days, df)
         return df, source, warnings
     except Exception as e:
-        warnings.append(f"Alpha Vantage failed: {str(e)}")
+        warnings.append(sanitize_provider_error(f"Alpha Vantage failed: {str(e)}"))
 
+    # 3. yfinance
     try:
         df, source = _fetch_yfinance_history(ticker, period_days)
         _save_cached_history(ticker, period_days, df)
         return df, source, warnings
     except Exception as e:
-        warnings.append(f"yfinance failed: {str(e)}")
+        warnings.append(sanitize_provider_error(f"yfinance failed: {str(e)}"))
 
-    cached_df = _load_cached_history(ticker, period_days)
-
-    if not cached_df.empty:
-        warnings.append("Using local cached market data because external providers failed.")
-        return cached_df, "Local cache from previous market data result", warnings
+    # 4. Try any existing cache, even if older.
+    stale_cached_df = _load_cached_history(ticker, period_days, max_age_hours=24 * 7)
+    if not stale_cached_df.empty:
+        warnings.append("外部行情源不可用，系统使用最近 7 天内的本地缓存数据。")
+        return stale_cached_df, "Local cache from previous market data result", warnings
 
     raise RuntimeError("; ".join(warnings))
 

@@ -20,6 +20,26 @@ def classify_query(question: str) -> QueryRoute:
     """
 
     q = question.lower().strip()
+    
+    prediction_keywords = [
+        "预测",
+        "明天",
+        "未来",
+        "下周",
+        "下个月",
+        "会涨",
+        "会跌",
+        "目标价",
+        "target price",
+        "forecast",
+        "predict",
+        "prediction",
+        "tomorrow",
+        "future",
+    ]
+
+    if any(keyword in q for keyword in prediction_keywords):
+        return QueryRoute.GENERAL
 
     rag_keywords = [
         "什么是",
@@ -38,6 +58,14 @@ def classify_query(question: str) -> QueryRoute:
         "net income",
         "cash flow",
         "balance sheet",
+        "季度财报",
+        "财报摘要",
+        "业绩指引",
+        "毛利率",
+        "earnings",
+        "quarterly report",
+        "guidance",
+        "gross margin",
     ]
 
     event_keywords = [

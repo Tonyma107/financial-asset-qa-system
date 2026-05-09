@@ -3,6 +3,7 @@ __pycache__/
 *.pyc
 .venv/
 .env
+backend/.env
 
 # Data/cache
 backend/cache/
@@ -10,6 +11,7 @@ backend/chroma_db/
 
 # Node
 node_modules/
+frontend/node_modules/
 dist/
 .vite/
 

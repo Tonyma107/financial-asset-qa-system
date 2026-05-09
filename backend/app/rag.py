@@ -48,6 +48,20 @@ SOURCE_KEYWORDS = {
         "liabilities",
         "equity",
     ],
+    "earnings_report_basics.md": [
+        "季度财报",
+        "财报摘要",
+        "财报",
+        "earnings",
+        "quarterly report",
+        "eps",
+        "guidance",
+        "业绩指引",
+        "毛利率",
+        "gross margin",
+        "revenue",
+        "net income",
+    ],
 }
 
 def get_chroma_collection():
@@ -335,6 +349,16 @@ def build_rag_answer(question: str, retrieved_docs: List[Dict[str, Any]]) -> str
             "资产负债表 Balance Sheet 展示公司在某一时间点的财务状况。\n\n"
             "核心公式是：Assets = Liabilities + Shareholders' Equity。\n\n"
             "它可以帮助分析公司的偿债能力、资本结构和财务稳定性。"
+        )
+    elif "财报" in question or "earnings" in q or "quarterly report" in q:
+        main_answer = (
+            "季度财报摘要通常用于快速理解公司在一个季度中的经营表现。\n\n"
+            "核心指标包括营收 Revenue、净利润 Net Income、每股收益 EPS、毛利率 Gross Margin、"
+            "经营现金流 Operating Cash Flow 和业绩指引 Guidance。\n\n"
+            "如果要判断财报好坏，需要同时关注是否超出市场预期、增长是否加速、利润率是否改善、"
+            "现金流是否健康，以及管理层是否上调或下调未来指引。\n\n"
+            "当前知识库提供财报分析框架。如果要查询某公司真实最近季度财报，需要进一步接入 SEC、"
+            "公司 Investor Relations 页面或财报 API。"
         )
 
     else:
