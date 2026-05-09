@@ -1,0 +1,344 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #f4f6fb;
+  color: #172033;
+  font-family:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+}
+
+button,
+textarea {
+  font: inherit;
+}
+
+.app-shell {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  min-height: 100vh;
+}
+
+.sidebar {
+  background: #101828;
+  color: white;
+  padding: 24px;
+  overflow-y: auto;
+}
+
+.brand {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  margin-bottom: 28px;
+}
+
+.brand-icon {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #4f46e5, #06b6d4);
+  font-weight: 800;
+}
+
+.brand h1 {
+  margin: 0;
+  font-size: 22px;
+}
+
+.brand p {
+  margin: 4px 0 0;
+  color: #cbd5e1;
+  font-size: 13px;
+}
+
+.status-card,
+.info-card {
+  padding: 16px;
+  margin-bottom: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.section-label {
+  margin-bottom: 10px;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.sidebar .section-label {
+  color: #94a3b8;
+}
+
+.status-dot {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.status-online {
+  background: rgba(34, 197, 94, 0.16);
+  color: #86efac;
+}
+
+.status-offline {
+  background: rgba(239, 68, 68, 0.18);
+  color: #fecaca;
+}
+
+.status-checking {
+  background: rgba(234, 179, 8, 0.16);
+  color: #fde68a;
+}
+
+.info-card ul {
+  margin: 0;
+  padding-left: 18px;
+  color: #dbeafe;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.demo-list {
+  display: grid;
+  gap: 8px;
+}
+
+.demo-button,
+.secondary-button {
+  width: 100%;
+  cursor: pointer;
+  border: 0;
+  border-radius: 14px;
+  padding: 10px 12px;
+  text-align: left;
+  color: #e5e7eb;
+  background: rgba(255, 255, 255, 0.1);
+  transition: 0.15s ease;
+}
+
+.demo-button:hover,
+.secondary-button:hover {
+  background: rgba(255, 255, 255, 0.17);
+}
+
+.demo-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.small-text {
+  margin: 10px 0 0;
+  color: #cbd5e1;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.chat-panel {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.chat-header {
+  padding: 26px 32px;
+  border-bottom: 1px solid #e5e7eb;
+  background: white;
+}
+
+.chat-header h2 {
+  margin: 0;
+  font-size: 24px;
+}
+
+.chat-header p {
+  margin: 6px 0 0;
+  color: #64748b;
+}
+
+.messages {
+  flex: 1;
+  padding: 28px 32px;
+  overflow-y: auto;
+}
+
+.message-card {
+  max-width: 960px;
+  margin-bottom: 18px;
+  padding: 18px;
+  border-radius: 20px;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+}
+
+.user-card {
+  margin-left: auto;
+  background: #2563eb;
+  color: white;
+}
+
+.assistant-card {
+  margin-right: auto;
+  background: white;
+  color: #172033;
+}
+
+.message-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.message-body {
+  white-space: pre-wrap;
+  line-height: 1.65;
+  font-size: 15px;
+}
+
+.route-badge {
+  display: inline-flex;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: #e2e8f0;
+  color: #334155;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.route-market_data {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.route-rag_qa {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.route-event_analysis {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.route-error {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.sources {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.sources ul {
+  margin: 0;
+  padding-left: 18px;
+  color: #475569;
+  line-height: 1.6;
+}
+
+.market-table-wrapper {
+  margin-top: 16px;
+  overflow-x: auto;
+}
+
+.market-table {
+  width: 100%;
+  min-width: 720px;
+  border-collapse: collapse;
+  overflow: hidden;
+  border-radius: 14px;
+  font-size: 13px;
+}
+
+.market-table th,
+.market-table td {
+  padding: 10px;
+  border-bottom: 1px solid #e5e7eb;
+  text-align: right;
+}
+
+.market-table th:first-child,
+.market-table td:first-child {
+  text-align: left;
+}
+
+.market-table th {
+  background: #f8fafc;
+  color: #475569;
+  font-weight: 800;
+}
+
+.input-area {
+  display: grid;
+  grid-template-columns: 1fr 130px;
+  gap: 14px;
+  padding: 20px 32px 28px;
+  border-top: 1px solid #e5e7eb;
+  background: white;
+}
+
+.input-area textarea {
+  resize: none;
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  border-radius: 18px;
+  padding: 14px 16px;
+  outline: none;
+  line-height: 1.5;
+}
+
+.input-area textarea:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+}
+
+.input-area button {
+  cursor: pointer;
+  border: 0;
+  border-radius: 18px;
+  background: #2563eb;
+  color: white;
+  font-weight: 800;
+}
+
+.input-area button:disabled {
+  cursor: not-allowed;
+  background: #94a3b8;
+}
+
+@media (max-width: 900px) {
+  .app-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    max-height: none;
+  }
+
+  .input-area {
+    grid-template-columns: 1fr;
+  }
+}
