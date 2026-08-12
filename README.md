@@ -1,102 +1,102 @@
-# Financial Asset QA System 金融资产问答系统
+# Financial Asset Q&A System
 
-这是一个基于 **React 前端 + FastAPI 后端 + 金融行情 API + RAG 知识库 + LLM 结构化回答生成** 的金融资产问答系统。
+A financial asset question-answering system built with a **React frontend, FastAPI backend, financial market APIs, a RAG knowledge base, and LLM-powered structured response generation**.
 
-项目目标不是做一个简单的 ChatGPT 套壳，而是实现一个能够根据问题类型自动选择工具的金融问答系统：
+Rather than being a simple ChatGPT wrapper, the project automatically selects the appropriate tool based on the type of question:
 
-- 行情类问题：调用外部行情 API 获取真实价格数据
-- 金融知识类问题：通过本地金融知识库和 Chroma 向量检索回答
-- 事件分析类问题：结合历史行情、成交量、可选新闻搜索和 LLM 总结
-- 财报知识类问题：基于财报知识库解释季度财报摘要核心指标
-- 预测类问题：明确拒绝预测未来股价，不提供买卖建议
+- Market questions: retrieve real price data from external market APIs
+- Financial knowledge questions: answer using a local financial knowledge base and Chroma vector search
+- Event analysis questions: combine historical prices, trading volume, optional news search, and LLM summaries
+- Earnings questions: explain the key metrics in quarterly earnings summaries using the earnings knowledge base
+- Prediction questions: explicitly decline to predict future stock prices or provide trading advice
 
-系统重点是：**数据驱动、结构清晰、可解释、减少 hallucination**。
-
----
-
-## 1. 项目功能
-
-### 1.1 资产行情问答
-
-示例问题：
-
-```text
-BABA 最近 7 天涨跌情况如何？
-AAPL 最近 7 天涨跌情况
-腾讯股价多少？
-谷歌近期表现如何？
-特斯拉近期走势如何？
-```
-
-系统会自动：
-
-1. 识别公司名称或股票代码
-2. 调用行情数据源
-3. 获取历史价格数据
-4. 计算涨跌额和涨跌幅
-5. 判断趋势：上涨 / 下跌 / 震荡
-6. 返回结构化回答和数据来源
-
-回答结构：
-
-```text
-【结论】
-【客观数据】
-【趋势分析】
-【数据来源】
-【风险提示】
-```
+The system focuses on being **data-driven, well-structured, explainable, and resistant to hallucinations**.
 
 ---
 
-### 1.2 事件分析
+## 1. Features
 
-示例问题：
+### 1.1 Market Data Q&A
 
-```text
-阿里巴巴为何 5 月 6 日大涨？
-苹果为何昨天大涨？
-英伟达为何上周大涨？
-特斯拉 4 月 30 日为什么跌了？
-苹果为何 2020 年 3 月 1 日大跌？
-```
-
-系统会自动：
-
-1. 识别 ticker
-2. 解析日期，包括“昨天”“上周五”“2020 年 3 月 1 日”等
-3. 查询事件日行情
-4. 计算当日涨跌幅
-5. 对比当日成交量和前 10 个交易日平均成交量
-6. 可选调用新闻搜索模块
-7. 使用 LLM 或模板生成结构化事件分析
-8. 输出不确定性说明，避免编造因果关系
-
-如果用户的问题假设不成立，例如：
+Example questions:
 
 ```text
-阿里巴巴为何 1 月 15 日大涨？
+How has BABA performed over the last 7 days?
+AAPL performance over the last 7 days
+What is Tencent's stock price?
+How has Google performed recently?
+What is Tesla's recent trend?
 ```
 
-但数据显示当天只上涨 0.61%，系统会说明这是“小幅波动/震荡”，而不是顺着用户问题编造“大涨原因”。
+The system automatically:
+
+1. Identifies the company name or ticker symbol
+2. Calls a market data source
+3. Retrieves historical price data
+4. Calculates the price and percentage changes
+5. Classifies the trend as upward, downward, or sideways
+6. Returns a structured answer with data sources
+
+Response structure:
+
+```text
+[Conclusion]
+[Objective Data]
+[Trend Analysis]
+[Data Sources]
+[Risk Disclaimer]
+```
 
 ---
 
-### 1.3 金融知识 RAG 问答
+### 1.2 Event Analysis
 
-示例问题：
+Example questions:
 
 ```text
-什么是市盈率？
-收入和净利润的区别是什么？
-现金流为什么重要？
-资产负债表是什么？
-季度财报摘要应该看哪些指标？
+Why did Alibaba surge on May 6?
+Why did Apple rise sharply yesterday?
+Why did NVIDIA surge last week?
+Why did Tesla fall on April 30?
+Why did Apple plunge on March 1, 2020?
 ```
 
-系统会先从本地金融知识库检索相关文档，再生成回答。
+The system automatically:
 
-当前知识库：
+1. Identifies the ticker
+2. Parses dates, including phrases such as "yesterday," "last Friday," and "March 1, 2020"
+3. Retrieves market data for the event date
+4. Calculates the daily percentage change
+5. Compares that day's trading volume with the average volume over the previous 10 trading days
+6. Optionally calls the news search module
+7. Uses an LLM or template to generate a structured event analysis
+8. Communicates uncertainty to avoid inventing causal explanations
+
+If the premise of a question is incorrect—for example:
+
+```text
+Why did Alibaba surge on January 15?
+```
+
+but the data shows that the stock rose by only 0.61%, the system describes it as a minor move or sideways trading instead of fabricating a reason for a "surge."
+
+---
+
+### 1.3 Financial Knowledge Q&A with RAG
+
+Example questions:
+
+```text
+What is the price-to-earnings ratio?
+What is the difference between revenue and net income?
+Why is cash flow important?
+What is a balance sheet?
+Which metrics should I review in a quarterly earnings summary?
+```
+
+The system retrieves relevant documents from the local financial knowledge base before generating an answer.
+
+Current knowledge base:
 
 ```text
 backend/docs/
@@ -107,68 +107,68 @@ backend/docs/
 └── earnings_report_basics.md
 ```
 
-RAG 流程：
+RAG pipeline:
 
-1. 读取 Markdown 文档
-2. 文档分块
-3. 存入 Chroma 向量数据库
-4. 向量检索相关 chunk
-5. 关键词 rerank 优化中文金融概念检索
-6. 使用 LLM 或模板生成带来源的结构化回答
-
----
-
-### 1.4 财报摘要能力
-
-系统支持财报摘要相关知识问答，例如：
-
-```text
-季度财报摘要应该看哪些指标？
-EPS 是什么？
-业绩指引为什么重要？
-毛利率怎么看？
-```
-
-当前版本提供财报分析框架，包括：
-
-- Revenue 营收
-- Net Income 净利润
-- EPS 每股收益
-- Gross Margin 毛利率
-- Operating Cash Flow 经营现金流
-- Guidance 业绩指引
-
-注意：当前系统不会编造某家公司真实最新季度财报。如果要查询公司真实财报，需要进一步接入 SEC EDGAR、公司 Investor Relations 页面或财报 API。
+1. Read Markdown documents
+2. Split documents into chunks
+3. Store the chunks in a Chroma vector database
+4. Retrieve relevant chunks with vector search
+5. Apply keyword reranking to improve retrieval of Chinese financial concepts
+6. Use an LLM or template to generate a structured answer with sources
 
 ---
 
-### 1.5 预测类问题处理
+### 1.4 Earnings Summary Support
 
-示例问题：
-
-```text
-帮我预测一下英伟达明天的股价
-苹果未来会涨吗？
-特斯拉下周目标价是多少？
-```
-
-系统会返回：
+The system supports knowledge questions about earnings summaries, such as:
 
 ```text
-【无法提供预测】
-本系统不预测未来股价，也不提供买卖建议。
+Which metrics should I review in a quarterly earnings summary?
+What is EPS?
+Why is guidance important?
+How should I interpret gross margin?
 ```
 
-系统可以提供替代分析：
+The current version provides an earnings analysis framework that covers:
 
-- 最近 7 天 / 30 天历史走势
-- 已发生日期的事件分析
-- 历史涨跌幅和成交量变化
-- 金融指标解释
+- Revenue
+- Net income
+- Earnings per share (EPS)
+- Gross margin
+- Operating cash flow
+- Guidance
+
+Note: the current system does not fabricate a company's actual latest quarterly results. Retrieving real company filings would require an additional integration with SEC EDGAR, company investor relations pages, or an earnings data API.
 
 ---
 
-## 2. 系统架构图
+### 1.5 Handling Prediction Questions
+
+Example questions:
+
+```text
+Predict NVIDIA's stock price tomorrow.
+Will Apple go up in the future?
+What is Tesla's target price next week?
+```
+
+The system responds with:
+
+```text
+[Prediction Unavailable]
+This system does not predict future stock prices or provide trading advice.
+```
+
+It can offer alternative analysis, including:
+
+- Historical performance over the last 7 or 30 days
+- Event analysis for dates in the past
+- Historical price and volume changes
+- Explanations of financial metrics
+
+---
+
+## 2. System Architecture
 
 ```mermaid
 flowchart TD
@@ -208,98 +208,98 @@ flowchart TD
 
 ---
 
-## 3. 技术选型说明
+## 3. Technology Choices
 
-### 3.1 为什么使用 FastAPI？
+### 3.1 Why FastAPI?
 
-选择 FastAPI 的原因：
+FastAPI was selected because:
 
-- Python 生态适合接入 yfinance、Alpha Vantage、ChromaDB 和 LLM SDK
-- FastAPI 原生支持 Pydantic 数据校验
-- API 结构清晰，适合快速构建 `/api/chat`、`/api/ingest` 等接口
-- 自动生成 OpenAPI 文档，方便调试和扩展
-- 性能和工程结构比简单 Flask demo 更适合展示后端设计能力
-
----
-
-### 3.2 为什么使用 React + Vite？
-
-选择 React + Vite 的原因：
-
-- Vite 启动快，适合快速开发 demo
-- React 适合构建聊天式交互界面
-- 前后端分离，结构清楚
-- 可以清晰展示 route badge、sources、market history table 等模块
-- 比 Next.js 更轻量，减少部署和学习成本
+- Python's ecosystem works well with yfinance, Alpha Vantage, ChromaDB, and LLM SDKs
+- FastAPI provides native Pydantic data validation
+- Its clear API structure is well suited to endpoints such as `/api/chat` and `/api/ingest`
+- It automatically generates OpenAPI documentation for easier debugging and extension
+- Its performance and project structure are better suited to demonstrating backend engineering than a simple Flask demo
 
 ---
 
-### 3.3 为什么使用 ChromaDB？
+### 3.2 Why React and Vite?
 
-选择 ChromaDB 的原因：
+React and Vite were selected because:
 
-- 本地可运行，不依赖额外云服务
-- 支持持久化存储，适合 demo 和离线知识库
-- 与 Python RAG pipeline 集成简单
-- 相比 FAISS，Chroma 自带 collection、metadata、document storage，更适合小型知识库 demo
-- 方便展示 document chunk、source、distance 等检索信息
-
----
-
-### 3.4 为什么使用 Alpha Vantage + yfinance？
-
-选择 Alpha Vantage 的原因：
-
-- 提供公开股票日线数据 API
-- 数据结构清晰，便于计算 open/high/low/close/volume
-- 适合构建市场数据 grounding
-
-选择 yfinance 作为 fallback 的原因：
-
-- 上手快
-- 可作为 Alpha Vantage 限速时的备用数据源
-- 能提升 demo 稳定性
-
-系统还加入了 local cache，减少重复请求，保护 API quota。
+- Vite starts quickly and is well suited to rapid demo development
+- React works well for chat-style interfaces
+- The separated frontend and backend provide a clear project structure
+- Components such as route badges, sources, and market history tables can be presented clearly
+- The stack is lighter than Next.js, reducing deployment complexity and the learning curve
 
 ---
 
-### 3.5 为什么使用 rule-based Query Router？
+### 3.3 Why ChromaDB?
 
-当前版本使用 rule-based router，而不是一开始就使用复杂 Agent，原因是：
+ChromaDB was selected because:
 
-- 路由规则清晰，可解释
-- 容易测试边界 case
-- 避免 LLM router 自身出现不稳定分类
-- 对 demo 来说足够覆盖核心问题类型
-
-未来可以升级为 LLM-based router 或 LangGraph agent。
-
----
-
-### 3.6 为什么使用模板 fallback + LLM optional？
-
-金融问答对准确性要求高。系统不能在 LLM 不可用或数据不足时随便生成答案。
-
-因此当前设计是：
-
-- 有 `DEEPSEEK_API_KEY`：调用 DeepSeek LLM 基于真实数据和检索结果生成回答
-- 没有 key 或调用失败：降级到 deterministic template fallback
-- 不允许 LLM 自由编造价格、成交量、新闻、财报或政策
-
-这样既满足 LLM 集成要求，也保证系统稳定可运行。
+- It runs locally without requiring an additional cloud service
+- It supports persistent storage for demos and offline knowledge bases
+- It integrates easily with Python RAG pipelines
+- Unlike FAISS, Chroma includes collections, metadata, and document storage, making it a good fit for a small knowledge-base demo
+- It makes retrieval details such as document chunks, sources, and distances easy to inspect
 
 ---
 
-## 4. Prompt 设计思路
+### 3.4 Why Alpha Vantage and yfinance?
 
-系统将 Prompt 独立放在：
+Alpha Vantage was selected because:
+
+- It provides a public API for daily stock data
+- Its clear data structure makes open, high, low, close, and volume calculations straightforward
+- It provides grounding for market-data answers
+
+yfinance is used as a fallback because:
+
+- It is quick to set up
+- It provides a backup when Alpha Vantage is rate-limited
+- It improves demo reliability
+
+The system also includes a local cache to reduce duplicate requests and conserve API quota.
+
+---
+
+### 3.5 Why a Rule-Based Query Router?
+
+The current version uses a rule-based router instead of starting with a complex agent because:
+
+- Routing rules are clear and explainable
+- Edge cases are easy to test
+- It avoids unstable classifications from an LLM router
+- It covers the core question types required for the demo
+
+The router can later be upgraded to an LLM-based router or a LangGraph agent.
+
+---
+
+### 3.6 Why an Optional LLM with a Template Fallback?
+
+Financial Q&A requires a high degree of accuracy. The system must not generate arbitrary answers when the LLM is unavailable or the supporting data is insufficient.
+
+The current design therefore works as follows:
+
+- If `DEEPSEEK_API_KEY` is configured, DeepSeek generates an answer from real data and retrieval results
+- If the key is missing or the request fails, the system falls back to deterministic templates
+- The LLM is not allowed to invent prices, trading volume, news, earnings, or policies
+
+This design supports LLM integration while keeping the system reliable and functional without it.
+
+---
+
+## 4. Prompt Design
+
+Prompts are kept in a dedicated file:
 
 ```text
 backend/app/prompts.py
 ```
 
-包含三类 Prompt：
+It contains three prompt types:
 
 ```text
 MARKET_ANSWER_PROMPT
@@ -307,203 +307,197 @@ RAG_ANSWER_PROMPT
 EVENT_ANALYSIS_PROMPT
 ```
 
----
-
 ### 4.1 Market Answer Prompt
 
-用于行情问答。
+Used for market data questions.
 
-核心约束：
+Core constraints:
 
-- 所有价格、涨跌幅、成交量必须来自 `market_data`
-- 不得凭记忆编造数字
-- 不得预测未来价格
-- 必须区分客观数据和趋势分析
-- 不得将相关性描述为因果关系
+- All prices, percentage changes, and trading volumes must come from `market_data`
+- Numbers must not be invented from memory
+- Future prices must not be predicted
+- Objective data must be separated from trend analysis
+- Correlation must not be presented as causation
 
-输出结构：
+Output structure:
 
 ```text
-【结论】
-【客观数据】
-【趋势分析】
-【数据来源】
-【风险提示】
+[Conclusion]
+[Objective Data]
+[Trend Analysis]
+[Data Sources]
+[Risk Disclaimer]
 ```
-
----
 
 ### 4.2 RAG Answer Prompt
 
-用于金融知识问答。
+Used for financial knowledge questions.
 
-核心约束：
+Core constraints:
 
-- 回答必须以 `retrieved_docs` 为主要依据
-- 如果需要补充通识知识，必须标注“补充说明，非知识库内容”
-- 不得编造公式、监管规定或具体数据
-- 如果知识库没有覆盖，必须说明“当前知识库暂未覆盖该主题”
+- Answers must be based primarily on `retrieved_docs`
+- General knowledge added beyond the retrieved documents must be labeled as "Additional context—not from the knowledge base"
+- Formulas, regulations, and specific figures must not be invented
+- If the topic is not covered, the answer must state that it is not currently covered by the knowledge base
 
-输出结构：
+Output structure:
 
 ```text
-【核心定义】
-【详细说明】
-【常见误区】
-【知识来源】
+[Core Definition]
+[Detailed Explanation]
+[Common Misconceptions]
+[Sources]
 ```
-
----
 
 ### 4.3 Event Analysis Prompt
 
-用于事件分析。
+Used for event analysis.
 
-核心约束：
+Core constraints:
 
-- 价格和成交量必须来自真实 market data
-- 如果涨跌幅绝对值小于 2%，必须先纠正用户“大涨/大跌”的前提
-- 新闻摘要只能作为参考，不能把相关性说成确定因果
-- 如果新闻搜索未配置，必须说明“当前未获取到可靠相关新闻”
-- 不得捏造新闻、财报日期、政策或公司公告
-- 不预测未来走势
+- Price and volume figures must come from real market data
+- If the absolute price change is less than 2%, the system must first correct the user's premise of a "surge" or "plunge"
+- News summaries are references only and must not be presented as proof of causation
+- If news search is not configured, the system must state that no reliable related news was retrieved
+- News, earnings dates, policies, and company announcements must not be fabricated
+- Future trends must not be predicted
 
-输出结构：
+Output structure:
 
 ```text
-【事实核查】
-【可能影响因素分析】
-【不确定性说明】
-【数据来源】
-【风险提示】
+[Fact Check]
+[Analysis of Possible Factors]
+[Uncertainty]
+[Data Sources]
+[Risk Disclaimer]
 ```
 
 ---
 
-## 5. LLM 集成模块
+## 5. LLM Integration
 
-LLM 模块位于：
+The LLM module is located at:
 
 ```text
 backend/app/llm.py
 ```
 
-当前使用 DeepSeek，兼容 OpenAI SDK 调用方式。
+It currently uses DeepSeek through an OpenAI-compatible SDK interface.
 
-设计逻辑：
+Design logic:
 
 ```text
-有 DEEPSEEK_API_KEY
-    → 调用 deepseek-chat
-无 DEEPSEEK_API_KEY
-    → 返回模板 fallback
-LLM 调用失败
-    → 返回模板 fallback
+DEEPSEEK_API_KEY is configured
+    → Call deepseek-chat
+DEEPSEEK_API_KEY is not configured
+    → Return a template-based fallback
+LLM request fails
+    → Return a template-based fallback
 ```
 
-LLM 的角色不是直接回答问题，而是基于系统已经准备好的 grounded context 进行结构化总结。
+The LLM does not answer questions directly. It produces a structured summary from grounded context already prepared by the system.
 
-LLM 输入包括：
+LLM inputs include:
 
-- market_data
-- retrieved_docs
-- event_data
-- news_summary
+- `market_data`
+- `retrieved_docs`
+- `event_data`
+- `news_summary`
 
-LLM 不允许：
+The LLM is not allowed to:
 
-- 编造行情数据
-- 编造新闻
-- 编造财报
-- 编造政策
-- 预测未来股价
-- 将相关性描述为确定因果
+- Fabricate market data
+- Fabricate news
+- Fabricate earnings information
+- Fabricate policies
+- Predict future stock prices
+- Present correlation as definite causation
 
 ---
 
-## 6. 新闻搜索模块
+## 6. News Search
 
-新闻搜索模块位于：
+The news search module is located at:
 
 ```text
 backend/app/news_search.py
 ```
 
-当前支持 Tavily API。
+It currently supports the Tavily API.
 
-逻辑：
+Logic:
 
 ```text
-有 TAVILY_API_KEY
-    → 调用 Tavily Search API 获取相关新闻摘要
-无 TAVILY_API_KEY
-    → 明确说明新闻搜索未配置
-搜索失败
-    → 返回友好提示，不暴露内部错误
+TAVILY_API_KEY is configured
+    → Call the Tavily Search API for related news summaries
+TAVILY_API_KEY is not configured
+    → Clearly state that news search is not configured
+Search fails
+    → Return a user-friendly message without exposing internal errors
 ```
 
-事件分析中，新闻摘要只作为参考，不作为确定因果证据。
+News summaries are treated only as references in event analysis, not as definitive evidence of causation.
 
-如果新闻搜索未配置，系统会明确说明：
+If news search is not configured, the system explicitly states:
 
 ```text
-新闻搜索未配置，事件原因分析将仅基于量价数据。
+News search is not configured. The event analysis will be based only on price and volume data.
 ```
 
 ---
 
-## 7. 数据来源
+## 7. Data Sources
 
-### 7.1 行情数据
+### 7.1 Market Data
 
-主要来源：
+Primary source:
 
 ```text
 Alpha Vantage TIME_SERIES_DAILY
 ```
 
-备用来源：
+Fallback source:
 
 ```text
 yfinance
 ```
 
-本地 fallback：
+Local fallback:
 
 ```text
 backend/cache/
 ```
 
-### 7.2 RAG 数据
+### 7.2 RAG Data
 
-本地 Markdown 文档：
+Local Markdown documents:
 
 ```text
 backend/docs/
 ```
 
-### 7.3 新闻数据
+### 7.3 News Data
 
-可选来源：
+Optional source:
 
 ```text
 Tavily Search API
 ```
 
-如果没有配置 Tavily key，系统不会编造新闻。
+The system does not fabricate news when a Tavily API key is not configured.
 
 ---
 
-## 8. 环境变量配置
+## 8. Environment Variables
 
-在 `backend/` 下创建 `.env`：
+Create a `.env` file inside `backend/`:
 
 ```bash
 cd backend
 touch .env
 ```
 
-内容：
+Add the following values:
 
 ```env
 ALPHA_VANTAGE_API_KEY=your_alpha_vantage_api_key_here
@@ -511,17 +505,15 @@ DEEPSEEK_API_KEY=your_deepseek_api_key_here
 TAVILY_API_KEY=your_tavily_api_key_here
 ```
 
-注意：
+Do not commit the real `.env` file to GitHub.
 
-真实 `.env` 不要提交到 GitHub。
-
-GitHub 中只保留：
+Only the following example file should be included in the repository:
 
 ```text
 backend/.env.example
 ```
 
-`.env.example` 示例：
+Example `.env.example`:
 
 ```env
 ALPHA_VANTAGE_API_KEY=your_alpha_vantage_api_key_here
@@ -531,9 +523,9 @@ TAVILY_API_KEY=your_tavily_api_key_here
 
 ---
 
-## 9. 本地运行方式
+## 9. Running Locally
 
-### 9.1 后端
+### 9.1 Backend
 
 ```bash
 cd backend
@@ -543,25 +535,21 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload --port 8000
 ```
 
-测试：
+Test the backend:
 
 ```bash
 curl http://localhost:8000/api/health
 ```
 
----
-
-### 9.2 构建 RAG Index
+### 9.2 Build the RAG Index
 
 ```bash
 curl -X POST http://localhost:8000/api/ingest
 ```
 
----
+### 9.3 Frontend
 
-### 9.3 前端
-
-另开一个 terminal：
+Open another terminal:
 
 ```bash
 cd frontend
@@ -569,7 +557,7 @@ npm install
 npm run dev
 ```
 
-打开：
+Open:
 
 ```text
 http://localhost:5173
@@ -577,7 +565,7 @@ http://localhost:5173
 
 ---
 
-## 10. API 说明
+## 10. API Reference
 
 ### Health Check
 
@@ -597,15 +585,15 @@ POST /api/ingest
 POST /api/chat
 ```
 
-请求：
+Request:
 
 ```json
 {
-  "question": "BABA 最近 7 天涨跌情况如何？"
+  "question": "How has BABA performed over the last 7 days?"
 }
 ```
 
-返回：
+Response:
 
 ```json
 {
@@ -622,206 +610,198 @@ POST /api/chat
 
 ## 11. Ticker Resolver
 
-支持示例：
+Supported examples:
 
 ```text
-阿里巴巴 → BABA
-特斯拉 → TSLA
-苹果 → AAPL
-英伟达 → NVDA
-微软 → MSFT
-亚马逊 → AMZN
-谷歌 → GOOGL
-腾讯 → TCEHY
-台积电 → TSM
-京东 → JD
-拼多多 → PDD
-百度 → BIDU
-比亚迪 → BYDDY
-小米 → XIACF
+Alibaba → BABA
+Tesla → TSLA
+Apple → AAPL
+NVIDIA → NVDA
+Microsoft → MSFT
+Amazon → AMZN
+Google → GOOGL
+Tencent → TCEHY
+TSMC → TSM
+JD.com → JD
+PDD Holdings → PDD
+Baidu → BIDU
+BYD → BYDDY
+Xiaomi → XIACF
 ```
 
-如果无法识别，公司名不会被乱猜，系统会提示用户输入明确 ticker。
+If a company cannot be identified, the system does not guess. Instead, it asks the user to provide an explicit ticker symbol.
 
 ---
 
-## 12. 日期解析和数据范围保护
+## 12. Date Parsing and Data-Range Protection
 
-支持：
+Supported formats include:
 
 ```text
-今天
-昨天
-上周
-上周五
-1 月 15 日
-2026 年 1 月 15 日
+today
+yesterday
+last week
+last Friday
+January 15
+January 15, 2026
 2026-01-15
 2026/01/15
 ```
 
-系统会检查用户询问日期是否在可用行情数据范围内。
+The system checks whether the requested date falls within the available market-data range.
 
-如果用户问：
-
-```text
-苹果为何 2020 年 3 月 1 日大跌？
-```
-
-但当前数据只覆盖近期，系统会拒绝误导性回答：
+For example, if a user asks:
 
 ```text
-系统无法查询该日期的行情数据，因此不会生成可能误导的结论。
+Why did Apple plunge on March 1, 2020?
 ```
 
-这避免了把 2020 年问题错误映射到 2026 年数据。
-
----
-
-## 13. 幻觉控制策略
-
-系统采用多层 hallucination control：
-
-1. 行情数据必须来自外部 API 或缓存
-2. 金融知识必须基于 RAG 检索
-3. LLM 只能基于提供的 context 总结
-4. 日期超出范围时拒绝回答
-5. 预测类问题直接拒绝
-6. 原始 API 错误会被清洗，不暴露 API key
-7. 事件分析不把相关性说成因果
-8. 用户前提错误时，系统会用数据纠正前提
-
----
-
-## 14. 已修复的重要 Bug
-
-### 14.1 相对日期无法解析
-
-已支持：
+but the current data covers only recent dates, the system refuses to provide a misleading answer:
 
 ```text
-昨天
-上周
-上周五
-今天
+The system cannot retrieve market data for that date, so it will not generate a potentially misleading conclusion.
 ```
+
+This prevents a question about 2020 from being incorrectly mapped to data from 2026.
 
 ---
 
-### 14.2 年份被忽略
+## 13. Hallucination Controls
 
-已修复：
+The system uses multiple layers of hallucination control:
+
+1. Market data must come from an external API or local cache
+2. Financial knowledge must be grounded in RAG retrieval
+3. The LLM may summarize only the context provided to it
+4. Questions outside the available date range are declined
+5. Prediction questions are declined directly
+6. Raw API errors are sanitized so API keys are not exposed
+7. Event analysis does not present correlation as causation
+8. When a user's premise is incorrect, the system corrects it using data
+
+---
+
+## 14. Important Bugs Fixed
+
+### 14.1 Relative Dates Could Not Be Parsed
+
+The following are now supported:
 
 ```text
-2020 年 3 月 1 日
+yesterday
+last week
+last Friday
+today
 ```
 
-不会再被当成当前年份。
+### 14.2 Years Were Ignored
 
----
-
-### 14.3 腾讯无法识别
-
-已添加：
+This has been fixed for dates such as:
 
 ```text
-腾讯 → TCEHY
+March 1, 2020
 ```
 
-并补充多个常见中概股和 ADR。
+They are no longer interpreted as dates in the current year.
 
----
+### 14.3 Tencent Was Not Recognized
 
-### 14.4 Alpha Vantage API key 暴露
-
-已修复：
-
-- 原始 provider error 会被 sanitize
-- 前端不会显示真实 API key
-- `.env` 被 `.gitignore` 忽略
-- README 只提供 `.env.example`
-
----
-
-### 14.5 预测问题误触发行情 API
-
-已修复：
+The following mapping was added:
 
 ```text
-帮我预测一下英伟达明天的股价
+Tencent → TCEHY
 ```
 
-现在会走 general route，并返回“不提供预测”。
+Several other commonly referenced Chinese companies and ADRs were also added.
+
+### 14.4 Alpha Vantage API Key Exposure
+
+This has been fixed:
+
+- Raw provider errors are sanitized
+- The frontend does not display the real API key
+- `.env` is ignored by `.gitignore`
+- The README includes only an `.env.example`
+
+### 14.5 Prediction Questions Incorrectly Triggered the Market API
+
+For example:
+
+```text
+Predict NVIDIA's stock price tomorrow.
+```
+
+These questions now use the general route and return a prediction refusal.
 
 ---
 
-## 15. 测试问题
+## 15. Test Questions
 
 ### Market Data
 
 ```text
-BABA 最近 7 天涨跌情况如何？
-腾讯股价多少？
-谷歌最近 30 天表现如何？
-特斯拉近期走势如何？
+How has BABA performed over the last 7 days?
+What is Tencent's stock price?
+How has Google performed over the last 30 days?
+What is Tesla's recent trend?
 ```
 
 ### RAG
 
 ```text
-什么是市盈率？
-什么是现金流？
-收入和净利润的区别是什么？
-季度财报摘要应该看哪些指标？
+What is the price-to-earnings ratio?
+What is cash flow?
+What is the difference between revenue and net income?
+Which metrics should I review in a quarterly earnings summary?
 ```
 
 ### Event Analysis
 
 ```text
-阿里巴巴为何 5 月 6 日大涨？
-苹果为何昨天大涨？
-英伟达为何上周大涨？
-苹果为何 2020 年 3 月 1 日大跌？
+Why did Alibaba surge on May 6?
+Why did Apple rise sharply yesterday?
+Why did NVIDIA surge last week?
+Why did Apple plunge on March 1, 2020?
 ```
 
 ### Prediction Refusal
 
 ```text
-帮我预测一下英伟达明天的股价
+Predict NVIDIA's stock price tomorrow.
 ```
 
 ---
 
-## 16. 当前限制
+## 16. Current Limitations
 
-1. 不预测未来股价
-2. 不提供投资建议
-3. 新闻搜索依赖 Tavily API key
-4. Alpha Vantage 免费 API 有请求限制
-5. 财报摘要目前主要提供分析框架，不抓取实时公司财报
-6. RAG 知识库规模较小
-7. 更复杂的多轮 Agent workflow 可继续扩展
-
----
-
-## 17. 后续优化方向
-
-1. 接入 SEC EDGAR 获取真实财报
-2. 接入公司 Investor Relations 页面
-3. 增加更多行情数据源 fallback
-4. 增加股票走势图
-5. 使用 LangGraph 做多工具 Agent
-6. 增加单元测试
-7. 增加 Docker Compose 一键启动
-8. 增加更完善的 API rate limit cache
-9. 扩充金融知识库
-10. 增加部署配置
+1. Does not predict future stock prices
+2. Does not provide investment advice
+3. News search requires a Tavily API key
+4. The free Alpha Vantage API has request limits
+5. Earnings summaries currently provide an analysis framework rather than retrieving real-time company filings
+6. The RAG knowledge base is small
+7. More complex multi-turn agent workflows remain a future extension
 
 ---
 
-## 18. 提交前检查
+## 17. Future Improvements
 
-后端：
+1. Integrate SEC EDGAR for real company filings
+2. Integrate company investor relations pages
+3. Add more fallback market data sources
+4. Add stock price charts
+5. Use LangGraph for a multi-tool agent
+6. Add unit tests
+7. Add one-command startup with Docker Compose
+8. Improve API rate-limit caching
+9. Expand the financial knowledge base
+10. Add deployment configuration
+
+---
+
+## 18. Pre-Commit Checklist
+
+Backend:
 
 ```bash
 cd backend
@@ -829,20 +809,20 @@ source .venv/bin/activate
 python -m py_compile app/*.py
 ```
 
-前端：
+Frontend:
 
 ```bash
 cd frontend
 npm run build
 ```
 
-Git 检查：
+Check Git status:
 
 ```bash
 git status
 ```
 
-确认不要提交：
+Make sure the following are not committed:
 
 ```text
 backend/.env
@@ -854,18 +834,18 @@ backend/chroma_db/
 
 ---
 
-## 19. 免责声明
+## 19. Disclaimer
 
-本项目仅用于学习、技术展示和面试 demo。
+This project is intended only for learning, technical demonstrations, and portfolio or interview use.
 
-本系统不构成：
+The system does not provide:
 
-- 投资建议
-- 金融建议
-- 交易建议
-- 买卖推荐
-- 未来价格预测
+- Investment advice
+- Financial advice
+- Trading advice
+- Buy or sell recommendations
+- Future price predictions
 
-所有行情数据来自第三方数据源，例如 Alpha Vantage 和 yfinance。数据准确性、延迟和可用性取决于第三方服务。
+All market data comes from third-party sources such as Alpha Vantage and yfinance. Its accuracy, latency, and availability depend on those services.
 
-用户在做任何金融决策前，应参考官方财报、交易所数据、公司公告、SEC 文件或专业金融数据源。
+Before making any financial decision, users should consult official financial statements, exchange data, company announcements, SEC filings, or professional financial data sources.
